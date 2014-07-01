@@ -1,0 +1,145 @@
+﻿<!doctype html />
+<html>
+<head>
+    <title>...</title>
+    <meta charset="utf-8" />
+    <script src="jq-1.7.2.js"></script>
+</head>
+<body>
+<canvas id="myCanvas" width='500' height='300' title="三个点可以拖动"></canvas>
+</body>
+</html>
+<script>
+
+    var canvas = document.getElementById("myCanvas"),
+        context = canvas.getContext("2d"),
+        //line = context.createLinearGradient(0, 0, 500, 300);
+        radial = context.createRadialGradient(0, 0, 30,
+            500, 300, 150);
+
+
+    drawGrid(context, "", "#c3c3c3", 10);
+    function drawGrid(context, style, color, step) {
+        context.strokeStyle = color;
+        //context.lineWidth = 0.5;
+        var width = canvas.width,
+            height = canvas.height;
+        var i = 0.5 + step;
+        for (; i <= width; i += step) {
+            context.beginPath();
+            context.moveTo(i, 0);
+            context.lineTo(i, height);
+            context.stroke();
+        }
+
+        for (i = 0.5 + step; i <= height; i += step) {
+            context.beginPath();
+            context.moveTo(0, i);
+            context.lineTo(width, i);
+            context.stroke();
+        }
+
+    }
+
+    var isDown = false;
+    var imgD;
+    var pos = { x: 0, y: 0 };
+
+    
+    function resetCanvas() {
+
+        if (!imgD) {
+            imgD = context.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.putImageData(imgD, 0, 0);
+
+    }
+
+    //贝塞尔
+    resetCanvas();
+
+    // 动态贝塞尔
+
+    var dynamicBezierPos1 = [{ x: 100, y: 100 }, { x: 150, y: 150 }, { x: 100, y: 150}],
+        targetPos;
+
+
+    function drawPoint(pos) {
+        context.beginPath();
+        context.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+        context.fill();
+    }
+
+
+   
+    function drawBezier() {
+        //resetCanvas();
+
+        //context.moveTo(firstPoint.x, firstPoint.y);
+        //context.lineTo(e.clientX, e.clientY);
+
+        context.beginPath();
+        context.bezierCurveTo(dynamicBezierPos1[0].x, dynamicBezierPos1[0].y,
+            dynamicBezierPos1[1].x, dynamicBezierPos1[1].y,
+            dynamicBezierPos1[2].x, dynamicBezierPos1[2].y);
+        context.stroke();
+
+    }
+
+
+    function drawDynamicBezier() {
+        drawPoint(dynamicBezierPos1[0]);
+        drawPoint(dynamicBezierPos1[1]);
+        drawPoint(dynamicBezierPos1[2]);
+        drawBezier();
+    }
+
+    var rect = canvas.getBoundingClientRect();
+    function getRealPos(e) {
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+    
+
+    canvas.onmousedown = mouseDown;
+    canvas.onmouseup = mouseUp;
+    canvas.onmousemove = mouseMove;
+
+    function mouseDown(e) {
+        targetPos = getInPath(e);
+        //console.log(targetPos);
+    }
+
+    function mouseUp(e) {
+        targetPos = null;
+    }
+
+    function mouseMove(e) {
+        //console.log(targetPos);
+        if (targetPos) {
+            resetCanvas();
+            var real = getRealPos(e);
+            targetPos.x = real.x;
+            targetPos.y = real.y;
+
+            drawDynamicBezier();
+            
+        }
+    }
+
+    function getInPath(e) {
+        var pos = getRealPos(e);
+
+        for (var i = 0; i < 3; i++) {
+            if (pos.x > dynamicBezierPos1[i].x - 4 && pos.x < dynamicBezierPos1[i].x + 4 &&
+            pos.y > dynamicBezierPos1[i].y - 4 && pos.y < dynamicBezierPos1[i].y + 4) {
+                return dynamicBezierPos1[i];
+            }
+        }
+
+    }
+
+    drawDynamicBezier();
+
+</script>

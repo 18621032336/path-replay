@@ -1,0 +1,14 @@
+.center{
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center
+}
+canvas{
+}
+.right{
+	width:800px;
+	height:100px;
+	margin-left:auto;
+	margin-right:auto;
+	border:1px solid #c3c3c3;
+}

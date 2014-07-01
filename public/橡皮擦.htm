@@ -1,0 +1,128 @@
+﻿<!doctype html />
+<html>
+<head>
+    <title>...</title>
+    <meta charset="utf-8" />
+    <script src="jq-1.7.2.js"></script>
+</head>
+<body>
+<canvas id="myCanvas" width='500' height='300'></canvas>
+<img id="myImg1" />
+<input id="rrr" value="25" />
+</body>
+</html>
+<script>
+
+    var canvas = document.getElementById("myCanvas"),
+        context = canvas.getContext("2d"),
+        imgD;
+
+    drawGrid(context, "", "#c3c3c3", 10);
+    function drawGrid(context, style, color, step) {
+        context.strokeStyle = color;
+        //context.lineWidth = 0.5;
+        var width = canvas.width,
+            height = canvas.height;
+        var i = 0.5 + step;
+        for (; i <= width; i += step) {
+            context.beginPath();
+            context.moveTo(i, 0);
+            context.lineTo(i, height);
+            context.stroke();
+        }
+
+        for (i = 0.5 + step; i <= height; i += step) {
+            context.beginPath();
+            context.moveTo(0, i);
+            context.lineTo(width, i);
+            context.stroke();
+        }
+
+    }
+
+
+    function resetCanvas() {
+
+        if (!imgD) {
+            imgD = context.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.putImageData(imgD, 0, 0);
+
+    }
+
+    //橡皮擦
+    resetCanvas();
+
+    var rrr = document.getElementById("rrr"),
+        isdown = false
+
+    canvas.onmousemove = mouseMove;
+    canvas.onmousedown = mouseDown;
+    canvas.onmouseup = mouseUp;
+
+    function mouseMove(e) {
+
+        var real = getCanvasToWindow(e);
+
+
+
+
+
+        if (isdown) {
+            clear(real);
+        } else {
+            resetCanvas();
+        }
+
+
+        drawCircle(real);
+
+    }
+
+    function drawCircle(real) {
+        context.beginPath();
+        context.arc(real.x, real.y, rrr.value, 0, Math.PI * 2);
+        context.stroke();
+    }
+
+    function mouseDown(e) {
+        isdown = true;
+        clear(getCanvasToWindow(e));
+    }
+
+    function mouseUp() {
+        isdown = false;
+    }
+
+    function clear(e) {
+        var r = rrr.value;
+
+        resetCanvas();
+
+        
+
+        context.save();
+
+        context.beginPath();
+        context.arc(e.x, e.y, rrr.value, 0, Math.PI * 2);
+        context.clip();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.restore();
+
+        imgD = null;
+        resetCanvas();
+        
+
+    }
+
+    function getCanvasToWindow(e) {
+        var rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+    }
+
+
+</script>

@@ -1,0 +1,13 @@
+{
+    "name": "path-replay",
+    "version": "1.0.0",
+    "author": "K.X.Zhang",
+    "description": "oh!lalalalalala",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+		"connect":"*"
+    }
+}
+
