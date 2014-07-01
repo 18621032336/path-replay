@@ -25,7 +25,7 @@
 	var replay = "";
 	var cache = [];
 
-	drawGrid(context, "", "#c3c3c3", 10);
+	drawGrid(context, "", "#cccccc", 10);
 	function drawGrid(context, style, color, step) {
 		context.strokeStyle = color;
 		//context.lineWidth = 0.5;
@@ -111,27 +111,21 @@
 
 
 	function clear() {
-		resetCanvas();
+	
+		playList = [];
 		replay = "";
-		pathData.value = "";
+		resetCanvas();
+		
 	}
 
 	function back() {
 		var num = pathBackNum.value;
 		if (isNaN(num)) {
-			alert("这里写数字才能撤销哦！！！");
-
-			alert("罚你点两万次确认框");
-
-			alert("还有19999次");
-			alert("还有19998次");
-
-			alert("→_→");
+			alert("just number!");
 			return;
 		}
 		clearTimeout(emptyTimeout);
 		replay = replay.replace(/\|+$/, "");
-		console.log(replay);
 		var replayA = replay.split("|");
 		replayA.splice(replayA.length - num);
 
@@ -141,7 +135,6 @@
 	}
 
 	function backPlay(replayA) {
-		console.log(replayA.length);
 		for (var i = 0; i < replayA.length; i++) {
 			var data = replayA[i];
 
@@ -159,8 +152,15 @@
 
 	function play(data) {
 		
-		playList = (data || replay).split("|");
+		if (data.split) {
+			playList = data.split("|");
+		} else {
+			playList = replay.split("|");
+		}
+		
 		resetCanvas();
+		
+		console.log(playList);
 		playing();
 	}
 
@@ -212,8 +212,7 @@
 	}
 	
 	function saveCallback(data) {
-		// 
-		console.log(data);
+		//
 		showDir(data);
 	}
 	
@@ -254,5 +253,6 @@
 
 	$.post("/dir", function(data){
 		showDir(data);
+		playByIndex(0); // default play
 	});
 })();
