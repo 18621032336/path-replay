@@ -1,29 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="generator"
-    content="HTML Tidy for HTML5 (experimental) for Windows https://github.com/w3c/tidy-html5/tree/c63cc39" />
-    <title>...</title>
+  <title>...</title>
     <link rel="stylesheet" href="public/css/main.css" />
     <meta charset="utf-8" />
   </head>
   <body>
+  <form name="pathform" action="#">
     <div class="center">
-      <div>
-        <canvas id="myCanvas" width='800' height='600'></canvas>
-      </div>
-      <div>
-      <textarea width="300" height="300" id="myData" style="display:none"></textarea> 
-      <input type="button" value="play" id="myPlay" title="" /> 
-      <input type="button" value="clear" id="myClear" /> 
-      <input type="button" value="go back" title="" id="myBack" /> 
-      <input type="input" value="5" id="myBackNum" title="numerical value" width="10" style="width:30px" />
-	  
-	  <input type="button" value="submit" />
+	  <div>
+		<canvas id="pathCanvas" name="pathCanvas" width='800' height='600'></canvas>
 	  </div>
-      
-    </div>
+    <div>
+    <input type="button" value="play" name="pathPlay" id="pathPlay" title="" /> 
+    <input type="button" value="clear" id="pathClear" name="pathClear" /> 
+    <input type="button" value="go back" title="" name="pathBack" id="pathBack" /> 
+    <input type="input" value="5" id="pathBackNum" name="pathBackNum" title="numerical value" width="10" style="width:30px" /></div>
+    <input type="button" value="submit" name="psubmit" /> 
+    <input type="input" name="pname" title="press you path name" /></div>
     <div class="right"></div>
+	
+	</form>
+    <script type="text/javascript" src="public/javascript/jquery.js"></script>
     <script type="text/javascript" src="public/javascript/script.js"></script>
   </body>
 </html>

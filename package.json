@@ -7,7 +7,8 @@
         "start": "node app.js"
     },
     "dependencies": {
-		"connect":"*"
+		"connect":"*",
+		"body-parser":"*"
     }
 }
 
