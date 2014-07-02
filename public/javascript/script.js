@@ -7,10 +7,7 @@
 		return obj;
 	}
 	
-	pathR.fn = pathR.prototype;
-	
-	//pathR.fn.prototype = pathR.fn;
-	pathR.fn.init = function(canvas) {
+	pathR.prototype.init = function(canvas) {
 		var that = this;
 		this.isDown = false;
 		this.imgD; // grid backup
@@ -45,8 +42,8 @@
 		
 		
 	};
+	pathR.fn = pathR.prototype;
 	pathR.fn.init.prototype = pathR.prototype;
-	
 
 	
 	pathR.fn.drawGrid = function (style, color, step) {
