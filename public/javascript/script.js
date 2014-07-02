@@ -1,36 +1,62 @@
-(function () {
-	var form = $("form")[0];
-	var	canvas = document.getElementById("pathCanvas");
-	var	context = canvas.getContext("2d");
+(function(win){
+	win.pathR = pathR;
+	
+	function pathR(canvas) {
+		var obj = new pathR.fn.init(canvas);
 		
-	var	pathPlay = form.pathPlay;
-	var	pathClear = form.pathClear;
-	var	pathBack = form.pathBack;
-	var	pathSubmit = form.psubmit;
-	var	pathName = form.pname;
-	var	pathBackNum = form.pathBackNum;
-	var	dirDiv = $(".right");
-
-	var isDown = false;
-	var	imgD; // grid backup
-	var	pos = {
-			x : 0,
-			y : 0
+		return obj;
+	}
+	
+	pathR.fn = pathR.prototype;
+	
+	//pathR.fn.prototype = pathR.fn;
+	pathR.fn.init = function(canvas) {
+		var that = this;
+		this.isDown = false;
+		this.imgD; // grid backup
+		this.pos = {
+				x : 0,
+				y : 0
+			};
+		this.isdown = false;
+		this.startPoint = {};
+		this.toPoint = {};
+		this.emptyTimeout = 0;
+		this.playList = [];
+		this.replay = "";
+		this.context = canvas.getContext("2d");
+		
+		this.context.lineWidth = 0.5;
+		this.context.strokeStyle = "rgb(255,0,0)";
+		
+		this.canvas = canvas;
+		
+		canvas.onmousedown = function(e) {
+			mouseDown.call(that, e);
 		};
-	var	isdown = false;
-	var	startPoint = {};
-	var	toPoint = {};
-	var	emptyTimeout = 0;
-	var	playList = [];
-	var replay = "";
-	var cache = [];
+		
+		canvas.onmousemove = function(e) {
+			mouseMove.call(that, e);
+		};
+		
+		canvas.onmouseup = function(e) {
+			mouseUp.call(that, e);
+		};
+		
+		
+	};
+	pathR.fn.init.prototype = pathR.prototype;
+	
 
-	drawGrid(context, "", "#cccccc", 10);
-	function drawGrid(context, style, color, step) {
+	
+	pathR.fn.drawGrid = function (style, color, step) {
+		var context = this.context;
+		var canvas = this.canvas;
+		context.save();
 		context.strokeStyle = color;
 		//context.lineWidth = 0.5;
-		var width = canvas.width,
-		height = canvas.height;
+		var width = canvas.width;
+		var height = canvas.height;
 		var i = 0.5 + step;
 		for (; i <= width; i += step) {
 			context.beginPath();
@@ -45,96 +71,94 @@
 			context.lineTo(width, i);
 			context.stroke();
 		}
-
+		context.restore();
+		
+		// backup
+		this.resetCanvas();
 	}
-
-	function resetCanvas() {
-
+	
+	// reset to grid
+	pathR.fn.resetCanvas = function() {
+		var context = this.context;
+		var canvas = this.canvas;
+		var imgD = this.imgD;
+		
 		if (!imgD) {
-			imgD = context.getImageData(0, 0, canvas.width, canvas.height);
+			imgD = context.getImageData(0, 0, canvas.width,
+				canvas.height);
+			this.imgD = imgD;
 		}
 
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		context.putImageData(imgD, 0, 0);
 	}
 
-	resetCanvas();
-
 	
 
-	canvas.onmousedown = mouseDown;
-	canvas.onmousemove = mouseMove;
-	canvas.onmouseup = mouseUp;
-	
-	pathPlay.onclick = play;
-	pathClear.onclick = clear;
-	pathBack.onclick = back;
-	pathSubmit.onclick = submit;
-
-	context.lineWidth = 0.5;
-	context.strokeStyle = "rgb(255,0,0)";
 
 	function mouseDown(e) {
-		isdown = true;
-		setPoint(e, startPoint);
+		this.isdown = true;
+		setPoint(e, this.canvas, this.startPoint);
 	}
 
-	function setPoint(e, point) { // 纠正位置
+	function setPoint(e, canvas, point) { // 纠正位置
+		
 		var rect = canvas.getBoundingClientRect(); //
 		point.x = e.clientX - rect.left;
 		point.y = e.clientY - rect.top;
 	}
 
 	function mouseMove(e) {
-		if (isdown) {
+		var context = this.context;
+		if (this.isdown) {
 
-			setPoint(e, toPoint);
+			setPoint(e, this.canvas, this.toPoint);
 			context.beginPath();
-			context.moveTo(startPoint.x, startPoint.y);
-			context.lineTo(toPoint.x, toPoint.y);
+			context.moveTo(this.startPoint.x, this.startPoint.y);
+			context.lineTo(this.toPoint.x, this.toPoint.y);
 			context.stroke();
 
 			//replay.push([startPoint.x,startPoint.y,toPoint.x,toPoint.y]);
-			replay += "|" + [startPoint.x, startPoint.y, toPoint.x, toPoint.y].join(",");
-			clearTimeout(emptyTimeout);
-			setPoint(e, startPoint);
+			this.replay += "|" + [this.startPoint.x, this.startPoint.y, 
+				this.toPoint.x, this.toPoint.y].join(",");
+			clearTimeout(this.emptyTimeout);
+			setPoint(e, this.canvas, this.startPoint);
 
 		}
 
 	}
 
 	function mouseUp() {
-		isdown = false;
-		empty();
+		this.isdown = false;
+		this.empty();
 	}
 
 
-
-	function clear() {
+	pathR.fn.clear = function () {
 	
-		playList = [];
-		replay = "";
-		resetCanvas();
-		
+		this.playList = [];
+		this.replay = "";
+		this.resetCanvas();
 	}
-
-	function back() {
-		var num = pathBackNum.value;
+	
+	pathR.fn.back = function(num) {
+	
 		if (isNaN(num)) {
 			alert("just number!");
 			return;
 		}
-		clearTimeout(emptyTimeout);
-		replay = replay.replace(/\|+$/, "");
-		var replayA = replay.split("|");
+		clearTimeout(this.emptyTimeout);
+		this.replay = this.replay.replace(/\|+$/, "");
+		var replayA = this.replay.split("|");
 		replayA.splice(replayA.length - num);
 
-		replay = replayA.join("|");
-		resetCanvas();
-		backPlay(replayA);
+		this.replay = replayA.join("|");
+		this.resetCanvas();
+		backPlay.call(this, replayA);
 	}
 
 	function backPlay(replayA) {
+		var context = this.context;
 		for (var i = 0; i < replayA.length; i++) {
 			var data = replayA[i];
 
@@ -150,21 +174,24 @@
 		}
 	}
 
-	function play(data) {
+	pathR.fn.play = function(data) {
 		
-		if (data.split) {
-			playList = data.split("|");
+		if (data) {
+			this.playList = data.split("|");
 		} else {
-			playList = replay.split("|");
+			this.playList = this.replay.split("|");
 		}
 		
-		resetCanvas();
+		this.resetCanvas();
 		
-		console.log(playList);
-		playing();
-	}
+		//console.log(playList);
+		playing.call(this);
+	};
 
 	function playing() {
+		var playList = this.playList;
+		var context = this.context;
+		var that = this;
 		if (playList.length > 0) {
 
 			var data = playList.shift();
@@ -178,25 +205,72 @@
 				context.closePath();
 			}
 
-			setTimeout(playing, 10);
+			setTimeout(function(){
+				playing.call(that);
+			}, 10);
 		}
 
 	}
 
-	function empty() {
+	pathR.fn.empty = function empty() {
 		//console.log("empty");
-		if (replay.length > 0) {
-			replay += "|";
+		var that = this;
+		if (this.replay.length > 0) {
+			this.replay += "|";
 		}
-		if (replay.substr(replay.length - 31, 30) == "||||||||||||||||||||||||||||||") { // 停顿不能太久
+		if (this.replay.substr(this.replay.length - 31, 30) == "||||||||||||||||||||||||||||||") { // 停顿不能太久
 			return;
 		}
-		emptyTimeout = setTimeout(empty, 50);
+		this.emptyTimeout = setTimeout(function(){
+			that.empty();
+		}, 50);
 	}
-	empty();
+})(this);
+
+
+
+(function () {
+	var form = $("form")[0];
+	var	canvas = document.getElementById("pathCanvas");
+	var	context = canvas.getContext("2d");
+		
+	var	pathPlay = form.pathPlay;
+	var	pathClear = form.pathClear;
+	var	pathBack = form.pathBack;
+	var	pathSubmit = form.psubmit;
+	var	pathName = form.pname;
+	var	pathBackNum = form.pathBackNum;
+	var image = form.image;
+	var	dirDiv = $(".right");
+	
+	var cache = [];
+	
+	var pathObj = new pathR(canvas);
+	
+
+
+	pathObj.drawGrid("", "#cccccc", 10);
+	pathObj.empty();
+	
+	$(pathPlay).click(function() {
+		pathObj.play();
+	});
+	
+	$(pathClear).click(function() {
+		pathObj.clear();
+	});
+	
+	$(pathBack).click(function() {
+		pathObj.back(pathBackNum.value);
+	});
+	
+	$(pathSubmit).click(submit);
+
 	
 	function submit() {
 		var name = pathName.value;
+		var replay = pathObj.replay;
+		
 		if (name.replace(/\s/g, "") === "" ) {
 			alert("input the name, please!");
 			return;
@@ -238,21 +312,28 @@
 	function playByIndex(index) {
 		if (cache[index]) {
 			// has cache return;
-			play(cache[index]);
+			pathObj.play(cache[index]);
 			return;
 		}
 		$.post("/play", {index:index}, function playCallback(data) {
 			//replay = data;
 			cache[index] = data;
-			play(data);
+			pathObj.play(data);
 		});
 	}
 	
 	
 	
 
-	$.post("/dir", function(data){
+ 	$.post("/dir", function(data){
 		showDir(data);
 		playByIndex(0); // default play
+		
 	});
+
+	$(image).click(function(){
+		open(pathObj.canvas.toDataURL());
+	});
+
+
 })();
