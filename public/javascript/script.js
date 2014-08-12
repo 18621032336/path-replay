@@ -104,7 +104,7 @@
 
 	function setPoint(e, canvas, point) { // adjustment position
 
-		var rect = canvas.getBoundingClientRect();  
+		var rect = canvas.getBoundingClientRect();  // 1
 		point.x = e.clientX - rect.left;
 		point.y = e.clientY - rect.top;
 	}
