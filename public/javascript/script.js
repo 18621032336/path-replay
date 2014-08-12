@@ -102,7 +102,7 @@
 		setPoint(e, this.canvas, this.startPoint);
 	}
 
-	function setPoint(e, canvas, point) { // 纠正位置
+	function setPoint(e, canvas, point) { // adjustment position
 
 		var rect = canvas.getBoundingClientRect(); //
 		point.x = e.clientX - rect.left;
@@ -222,7 +222,7 @@
 		if (this.replay.length > 0) {
 			this.replay += "|";
 		}
-		if (this.replay.substr(this.replay.length - 31, 30) == "||||||||||||||||||||||||||||||") { // 停顿不能太久
+		if (this.replay.substr(this.replay.length - 31, 30) == "||||||||||||||||||||||||||||||") { // 30 frame buffer
 			return;
 		}
 		this.emptyTimeout = setTimeout(function () {
